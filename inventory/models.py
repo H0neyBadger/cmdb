@@ -1,6 +1,5 @@
 from django.db import models
-
-# Create your models here.
+from organization.models import Team
 
 class Geo(models.Model):
     #TODO gps
@@ -13,6 +12,7 @@ class Asset(models.Model):
     # one location/asset 
     geo = models.ForeignKey(Geo, on_delete=models.CASCADE)
     # TODO owner/resp 
+    team = models.ForeignKey(Team, related_name="asset", help_text="Assest's team owner", null=True)
 
 class Domain(models.Model):
     # partially qualified domain name
@@ -61,7 +61,8 @@ class Host(Asset):
     os_family = models.ForeignKey(OSFamily, null=True)
     os_distribution = models.ForeignKey(OSDistribution, null=True)
     os_distribution_version = models.ForeignKey(OSDistributionVersion, null=True) 
-    # TODO owner/resp team
+    system_team = models.ForeignKey(Team, related_name="system", null=True)
+    application_team = models.ForeignKey(Team, related_name="application", null=True)
     # TODO env (dev prod)
     # TODO status (in use, shuted down, decomm...)
     # TODO critical 
