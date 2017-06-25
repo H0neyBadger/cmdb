@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ip', models.GenericIPAddressField()),
-                ('interface', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='pmapi.NetInterface')),
+                ('interface', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='inventory.NetInterface')),
             ],
         ),
         migrations.CreateModel(
@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=30, unique=True)),
                 ('version', models.IntegerField()),
-                ('os_distribution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pmapi.OSDistribution')),
+                ('os_distribution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.OSDistribution')),
             ],
         ),
         migrations.CreateModel(
@@ -86,8 +86,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('version', models.CharField(max_length=5)),
-                ('os_distribution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pmapi.OSDistribution')),
-                ('os_distribution_major_version', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pmapi.OSDistributionMajorVersion')),
+                ('os_distribution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.OSDistribution')),
+                ('os_distribution_major_version', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.OSDistributionMajorVersion')),
             ],
         ),
         migrations.CreateModel(
@@ -100,29 +100,29 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Host',
             fields=[
-                ('asset_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='pmapi.Asset')),
+                ('asset_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='inventory.Asset')),
                 ('local_name', models.CharField(max_length=30)),
                 ('dns_name', models.CharField(max_length=255)),
                 ('vm_name', models.CharField(max_length=30)),
-                ('domain', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='pmapi.Domain')),
-                ('hardware_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='pmapi.HardwareType')),
+                ('domain', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='inventory.Domain')),
+                ('hardware_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='inventory.HardwareType')),
             ],
-            bases=('pmapi.asset',),
+            bases=('inventory.asset',),
         ),
         migrations.AddField(
             model_name='osdistribution',
             name='os_family',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pmapi.OSFamily'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.OSFamily'),
         ),
         migrations.AddField(
             model_name='domainname',
             name='ip_address',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pmapi.NetIPAddress'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.NetIPAddress'),
         ),
         migrations.AddField(
             model_name='asset',
             name='geo',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pmapi.Geo'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.Geo'),
         ),
         migrations.AlterUniqueTogether(
             name='osdistributionversion',
@@ -135,26 +135,26 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='netinterface',
             name='host',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pmapi.Host'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.Host'),
         ),
         migrations.AddField(
             model_name='host',
             name='os_distribution',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='pmapi.OSDistribution'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='inventory.OSDistribution'),
         ),
         migrations.AddField(
             model_name='host',
             name='os_distribution_version',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='pmapi.OSDistributionVersion'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='inventory.OSDistributionVersion'),
         ),
         migrations.AddField(
             model_name='host',
             name='os_family',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='pmapi.OSFamily'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='inventory.OSFamily'),
         ),
         migrations.AddField(
             model_name='host',
             name='parent_host',
-            field=models.ForeignKey(help_text='VM parent host', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='guest', to='pmapi.Host'),
+            field=models.ForeignKey(help_text='VM parent host', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='guest', to='inventory.Host'),
         ),
     ]
