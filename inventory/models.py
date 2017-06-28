@@ -10,7 +10,7 @@ class Asset(models.Model):
     name = models.CharField(max_length=255)
     snow_id = models.CharField(max_length=255, help_text='ServiceNow database ID')
     # one location/asset 
-    geo = models.ForeignKey(Geo, on_delete=models.CASCADE)
+    geo = models.ForeignKey(Geo, on_delete=models.CASCADE, null=True)
     # TODO owner/resp 
     team = models.ForeignKey(Team, related_name="asset", help_text="Assest's team owner", null=True)
 
@@ -51,6 +51,8 @@ class OSDistributionVersion(models.Model):
         )
 
 class Host(Asset):
+    uuid = models.UUIDField(null=True)
+    machine_id = models.UUIDField(null=True)
     local_name = models.CharField(max_length=30)
     dns_name = models.CharField(max_length=255)
     vm_name = models.CharField(max_length=30)
@@ -76,7 +78,7 @@ class NetInterface(models.Model):
     name = models.CharField(max_length=30)
     # TODO mac 64
     mac_address = models.CharField(max_length=18)
-    host = models.ForeignKey(Host, on_delete=models.CASCADE)
+    host = models.ForeignKey(Host, on_delete=models.CASCADE, null=True)
 
 class NetIPAddress(models.Model):
     # TODO ping

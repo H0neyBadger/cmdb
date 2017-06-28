@@ -10,20 +10,32 @@ from ansible.playbook.play import Play
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.plugins.callback import CallbackBase
 
+from inventory.models import Host, NetInterface
+from django.db.models import Q
+
+from uuid import UUID
+results = {}
+
 class ResultCallback(CallbackBase):
-    """A sample callback plugin used for performing an action as results come in
-
-    If you want to collect all results into a single object for processing at
-    the end of the execution, look into utilizing the ``json`` callback plugin
-    or writing your own custom callback plugin
-    """
-    def v2_runner_on_ok(self, result, **kwargs):
-        """Print a json representation of the result
-
-        This method could store the result in an instance attribute for retrieval later
-        """
+    def v2_runner_on_unreachable(self, result):
         host = result._host
         print(json.dumps({host.name: result._result}, indent=4))
+
+    def v2_runner_on_ok(self, result, **kwargs):
+        global results
+        host = result._host
+        # ethernet[n].generatedAddress
+        # ethernet[n].addressType
+        # ethernet[n].generatedAddressOffset
+        # uuid.location
+        # uuid.bios
+        # ethernet[n].present
+        d = results.get(host, {})
+        if d: 
+            d.update(result._result)
+        else:
+            results[host] = result._result
+        #print(json.dumps({host.name: result._result}, indent=4))
 
 class Command(BaseCommand):
     help = "Refresh hosts' info from ansible"
@@ -39,12 +51,12 @@ class Command(BaseCommand):
         loader = DataLoader()
         
         options = Options(
-            connection='local', 
+            connection='ssh', 
             module_path='', 
             forks=100, 
-            become=None, 
-            become_method=None, 
-            become_user=None, 
+            become=False, 
+            become_method="sudo", 
+            become_user="root", 
             check=False
         )
 
@@ -61,15 +73,13 @@ class Command(BaseCommand):
                 hosts = 'all',
                 gather_facts = 'yes',
                 tasks = [
-                    dict(action=dict(module='command', args='uptime'), register='shell_out'),
-                    dict(action=dict(module='debug', args=dict(msg='{{shell_out.stdout}}')))
+                    dict(action=dict(module='shell', args="/usr/sbin/dmidecode | grep -i 'UUID:' | sed 's/[\t ]*UUID: //gI'"), become=True, register='dmidecode_out'),
                  ]
             )
         play = Play().load(play_source, variable_manager=variable_manager, loader=loader)
 
         # actually run it
         tqm = None
-        e = None 
         try:
             tqm = TaskQueueManager(
                       inventory=inventory,
@@ -85,11 +95,62 @@ class Command(BaseCommand):
         finally:
             if tqm is not None:
                 tqm.cleanup()
-        if e:
-            raise e
         return result
 
     def handle(self, *args, **options):
         inventory = options['hosts']
-        res = self.run_ansible(inventory)       
-        self.stdout.write(self.style.SUCCESS('Success {0}'.format(res)))
+        rc = self.run_ansible(inventory)
+        for name, values in results.items():
+            # retrieve shell task stdout 
+            facts = values["ansible_facts"]
+            local_name = facts.get('ansible_hostname')
+            uuid_str = values.get("stdout") # blanck line
+            if uuid_str :
+                uuid = UUID(uuid_str)
+            else :
+                uuid = None
+
+            machine_id_str = facts.get("ansible_machine_id")
+            if machine_id_str:
+                machine_id = UUID(machine_id_str)
+            else :
+                machine_id = None 
+            interfaces = facts.get("ansible_interfaces")
+            interfaces_ids = []
+            for inter in interfaces:
+                net_int = facts.get('ansible_{0}'.format(inter))
+                mac_addr = net_int.get("macaddress")
+                if mac_addr:
+                    net, created = NetInterface.objects.get_or_create(
+                            mac_address = mac_addr,
+                            defaults = {'name': inter}
+                    )
+                    interfaces_ids.append(net.pk)
+
+            hosts_list = Host.objects.filter(
+                    Q(uuid = uuid) &
+                    Q(machine_id = machine_id) &
+                    Q(netinterface__pk__in = interfaces_ids)
+            )
+            if hosts_list:
+                hosts_db = hosts_list[0]
+                hosts_db.local_name = local_name
+                hosts_db.save()
+            else :
+
+                hosts_db = Host.objects.create(
+                        name = local_name, 
+                        local_name = local_name,
+                        uuid = uuid, 
+                        machine_id = machine_id
+                )
+
+            nets = NetInterface.objects.filter(pk__in = interfaces_ids)
+            for net in nets:
+                net.host=hosts_db
+                net.save()
+
+
+
+
+        self.stdout.write(self.style.SUCCESS('Success {0}'.format(rc)))
