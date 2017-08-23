@@ -14,6 +14,9 @@ class Asset(models.Model):
     # TODO owner/resp 
     team = models.ForeignKey(Team, related_name="asset", help_text="Assest's team owner", null=True)
 
+    def __str__(self):
+        return '%s %s' % (self.name, self.pk)
+
 class Domain(models.Model):
     # partially qualified domain name
     name = models.CharField(max_length=255, help_text='partially qualified domain name', unique=True)
@@ -55,7 +58,7 @@ class Host(Asset):
     machine_id = models.UUIDField(null=True)
     local_name = models.CharField(max_length=30)
     dns_name = models.CharField(max_length=255)
-    vm_name = models.CharField(max_length=30)
+    vm_name = models.CharField(max_length=30, null=True)
     domain = models.ForeignKey(Domain, null=True)
     hardware_type = models.ForeignKey(HardwareType, null=True)
     parent_host = models.ForeignKey("self", help_text='VM parent host', related_name="guest", null=True)
