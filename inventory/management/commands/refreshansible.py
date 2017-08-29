@@ -10,7 +10,7 @@ from ansible.playbook.play import Play
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.plugins.callback import CallbackBase
 
-from inventory.models import Host, NetInterface
+from inventory.models import Host, Interface
 from django.db.models import Q
 
 from uuid import UUID
@@ -121,7 +121,7 @@ class Command(BaseCommand):
                 net_int = facts.get('ansible_{0}'.format(inter))
                 mac_addr = net_int.get("macaddress")
                 if mac_addr:
-                    net, created = NetInterface.objects.get_or_create(
+                    net, created = Interface.objects.get_or_create(
                             mac_address = mac_addr,
                             defaults = {'name': inter}
                     )
@@ -145,7 +145,7 @@ class Command(BaseCommand):
                         machine_id = machine_id
                 )
 
-            nets = NetInterface.objects.filter(pk__in = interfaces_ids)
+            nets = Interface.objects.filter(pk__in = interfaces_ids)
             for net in nets:
                 net.host=hosts_db
                 net.save()

@@ -77,22 +77,22 @@ class Host(Asset):
 
 # todo network class (vlan ip gw netmask ... dmz)
 
-class NetInterface(models.Model):
+class Interface(models.Model):
     name = models.CharField(max_length=30)
     # TODO mac 64
     mac_address = models.CharField(max_length=18)
-    host = models.ForeignKey(Host, on_delete=models.CASCADE, null=True)
+    host = models.ForeignKey(Host, related_name="interfaces", on_delete=models.CASCADE, null=True)
 
-class NetIPAddress(models.Model):
+class IPAddress(models.Model):
     # TODO ping
     ip = models.GenericIPAddressField()
     # interface = null means dns entry only
-    interface = models.ForeignKey(NetInterface, on_delete=models.CASCADE, null=True)
+    interface = models.ForeignKey(Interface, related_name="ip_address", on_delete=models.CASCADE, null=True)
 
 class DomainName(models.Model):
     # TODO dns record
     name = models.CharField(max_length=30)
-    ip_address = models.ForeignKey(NetIPAddress)
+    ip_address = models.ForeignKey(IPAddress, related_name="domain_names")
 
 ## applis
 

@@ -1,23 +1,23 @@
 from rest_framework import viewsets
 
 
-from inventory.models import Host, NetInterface, NetIPAddress
-from inventory.api.serializers import HostSerializer, NetInterfaceSerializer, NetIPAddressSerializer
+from inventory.models import Host, Interface, IPAddress
+from inventory.api.serializers import HostSerializer, InterfaceSerializer, IPAddressSerializer
 
 
-class NetIPAddressViewSet(viewsets.ModelViewSet):
+class IPAddressViewSet(viewsets.ModelViewSet):
     """
-    A simple ViewSet for viewing and editing NetIPAddress
+    A simple ViewSet for viewing and editing IPAddress
     """
-    queryset = NetIPAddress.objects.all()
-    serializer_class = NetIPAddressSerializer
+    queryset = IPAddress.objects.all()
+    serializer_class = IPAddressSerializer
 
-class NetInterfaceViewSet(viewsets.ModelViewSet):
+class InterfaceViewSet(viewsets.ModelViewSet):
     """
-    A simple ViewSet for viewing and editing NetInterface
+    A simple ViewSet for viewing and editing Interface
     """
-    queryset = NetInterface.objects.all()
-    serializer_class = NetInterfaceSerializer
+    queryset = Interface.objects.all()
+    serializer_class = InterfaceSerializer
  
 class HostViewSet(viewsets.ModelViewSet):
     """

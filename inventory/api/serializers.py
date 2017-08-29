@@ -1,21 +1,21 @@
 from rest_framework import serializers
 
-from inventory.models import Host, NetInterface, NetIPAddress
+from inventory.models import Host, Interface, IPAddress
 
 
-class NetIPAddressSerializer(serializers.ModelSerializer):
+class IPAddressSerializer(serializers.ModelSerializer):
     class Meta:
-        model = NetIPAddress
+        model = IPAddress
         fields = '__all__'
 
-class NetInterfaceSerializer(serializers.ModelSerializer):
-    netipaddress_set = NetIPAddressSerializer(many=True, read_only=True)
+class InterfaceSerializer(serializers.ModelSerializer):
+    ip_address = IPAddressSerializer(many=True, read_only=True)
     class Meta:
-        model = NetInterface
+        model = Interface
         fields = '__all__'
 
 class HostSerializer(serializers.ModelSerializer):
-    netinterface_set = NetInterfaceSerializer(many=True, read_only=True)
+    interfaces = InterfaceSerializer(many=True, read_only=True)
     class Meta:
         model = Host
         #depth = 2
