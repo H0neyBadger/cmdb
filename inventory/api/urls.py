@@ -4,7 +4,12 @@ from rest_framework import routers
 
 from inventory.api.views import HostViewSet, InterfaceViewSet, IPAddressViewSet
 
+from api.views import InventoryRootView
+
 router = routers.DefaultRouter()
+# rewrite default view name
+router.root_view_name = 'inventory-root'
+router.APIRootView = InventoryRootView
 router.register(r'hosts', HostViewSet)
 router.register(r'interfaces', InterfaceViewSet)
 router.register(r'ip_address', IPAddressViewSet)
