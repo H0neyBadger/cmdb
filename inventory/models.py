@@ -10,9 +10,15 @@ class Asset(models.Model):
     name = models.CharField(max_length=255)
     snow_id = models.CharField(max_length=255, help_text='ServiceNow database ID')
     # one location/asset 
-    geo = models.ForeignKey(Geo, on_delete=models.CASCADE, null=True)
+    geo = models.ForeignKey(Geo, on_delete=models.SET_NULL, null=True)
     # TODO owner/resp 
-    team = models.ForeignKey(Team, related_name="asset", help_text="Assest's team owner", null=True)
+    team = models.ForeignKey(
+        Team, 
+        related_name="asset", 
+        help_text="Assest's team owner", 
+        null=True,
+        on_delete=models.PROTECT
+    )
 
     def __str__(self):
         return '%s %s' % (self.name, self.pk)
@@ -59,15 +65,20 @@ class Host(Asset):
     local_name = models.CharField(max_length=30)
     dns_name = models.CharField(max_length=255)
     vm_name = models.CharField(max_length=30, null=True)
-    domain = models.ForeignKey(Domain, null=True)
-    hardware_type = models.ForeignKey(HardwareType, null=True)
-    parent_host = models.ForeignKey("self", help_text='VM parent host', related_name="guest", null=True)
+    domain = models.ForeignKey(Domain, null=True, on_delete=models.PROTECT)
+    hardware_type = models.ForeignKey(HardwareType, null=True, on_delete=models.PROTECT)
+    parent_host = models.ForeignKey("self", 
+        help_text='VM parent host', 
+        related_name="guest", 
+        null=True, 
+        on_delete=models.SET_NULL
+    )
     # TODO public_keys
-    os_family = models.ForeignKey(OSFamily, null=True)
-    os_distribution = models.ForeignKey(OSDistribution, null=True)
-    os_distribution_version = models.ForeignKey(OSDistributionVersion, null=True) 
-    system_team = models.ForeignKey(Team, related_name="system", null=True)
-    application_team = models.ForeignKey(Team, related_name="application", null=True)
+    os_family = models.ForeignKey(OSFamily, null=True, on_delete=models.PROTECT)
+    os_distribution = models.ForeignKey(OSDistribution, null=True, on_delete=models.PROTECT)
+    os_distribution_version = models.ForeignKey(OSDistributionVersion, null=True, on_delete=models.PROTECT) 
+    system_team = models.ForeignKey(Team, related_name="system", null=True, on_delete=models.PROTECT)
+    application_team = models.ForeignKey(Team, related_name="application", null=True, on_delete=models.PROTECT)
     # TODO env (dev prod)
     # TODO status (in use, shuted down, decomm...)
     # TODO critical 
@@ -92,7 +103,7 @@ class IPAddress(models.Model):
 class DomainName(models.Model):
     # TODO dns record
     name = models.CharField(max_length=30)
-    ip_address = models.ForeignKey(IPAddress, related_name="domain_names")
+    ip_address = models.ForeignKey(IPAddress, related_name="domain_names", on_delete=models.PROTECT)
 
 ## applis
 
